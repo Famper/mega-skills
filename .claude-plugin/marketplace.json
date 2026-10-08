@@ -1,0 +1,14 @@
+{
+  "name": "mega-skills",
+  "description": "Скиллы Claude Code: ревью PR с вердиктом, ответы клиентам, preflight окружения, мульти-репо фичи",
+  "owner": {
+    "name": "Famper"
+  },
+  "plugins": [
+    {
+      "name": "mega-skills",
+      "source": "./plugins/mega-skills",
+      "description": "Ревью PR с вердиктом, ответы клиентам, preflight окружения, мульти-репо фичи"
+    }
+  ]
+}

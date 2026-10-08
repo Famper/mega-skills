@@ -1,0 +1,8 @@
+{
+  "name": "mega-skills",
+  "description": "Ревью PR с вердиктом, ответы клиентам, preflight окружения, мульти-репо фичи",
+  "version": "1.0.0",
+  "author": {
+    "name": "Famper"
+  }
+}
