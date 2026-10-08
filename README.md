@@ -13,7 +13,18 @@
 | preflight | `/mega-skills:preflight` | Проверка и починка окружения перед тестами: Docker/OrbStack, APP_URL в .env, смонтированный worktree, изоляция тестовой БД. |
 | multi-repo-feature | `/mega-skills:multi-repo-feature <описание>` | План фичи на backend, gateway и frontend, согласованные PR, проверка, что всё дошло до main. |
 
-Вызывать вручную не обязательно: Claude сам подключает скилл, когда запрос подходит под его описание. Например, «проверь PR 2989 и дай вердикт» запустит `review-pr`.
+## Хуки
+
+Плагин также ставит два хука, они работают автоматически:
+
+| Хук | Когда | Что делает |
+|---|---|---|
+| docker-check | Начало сессии | Если в проекте есть docker-compose, а Docker/OrbStack не отвечает, предупреждает Claude, и тот сразу говорит вам, а не тратит время на обходные пути. |
+| php-lint | После правки `.php` | Прогоняет phpcs по изменённому файлу (стандарт `App/Standards/Laravel.xml` или `phpcs.xml` проекта) и возвращает ошибки Claude, чтобы он исправил их до пуша. Предупреждения не показывает, только ошибки. |
+
+Хукам нужны `jq` и `php` на машине. Если phpcs в проекте не установлен, php-lint молчит.
+
+Вызывать скиллы вручную не обязательно: Claude сам подключает скилл, когда запрос подходит под его описание. Например, «проверь PR 2989 и дай вердикт» запустит `review-pr`.
 
 ## Установка
 
@@ -82,11 +93,15 @@ mega-skills/
     └── mega-skills/
         ├── .claude-plugin/
         │   └── plugin.json       # описание плагина
-        └── skills/
-            ├── review-pr/SKILL.md
-            ├── customer-reply/SKILL.md
-            ├── preflight/SKILL.md
-            └── multi-repo-feature/SKILL.md
+        ├── skills/
+        │   ├── review-pr/SKILL.md
+        │   ├── customer-reply/SKILL.md
+        │   ├── preflight/SKILL.md
+        │   └── multi-repo-feature/SKILL.md
+        └── hooks/
+            ├── hooks.json        # подключение хуков
+            ├── docker-check.sh
+            └── php-lint.sh
 ```
 
 ## Как добавить свой скилл
