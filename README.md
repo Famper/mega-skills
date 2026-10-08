@@ -95,9 +95,9 @@ mega-skills/
         │   └── plugin.json       # описание плагина
         ├── skills/
         │   ├── review-pr/SKILL.md
-            ├── customer-reply/SKILL.md
-            ├── preflight/SKILL.md
-            └── multi-repo-feature/SKILL.md
+        │   ├── customer-reply/SKILL.md
+        │   ├── preflight/SKILL.md
+        │   └── multi-repo-feature/SKILL.md
         └── hooks/
             ├── hooks.json        # подключение хуков
             ├── docker-check.sh
