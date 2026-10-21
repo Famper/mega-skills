@@ -8,8 +8,8 @@
 
 | Скилл | Вызов | Что делает |
 |---|---|---|
-| review-pr | `/mega-skills:review-pr 2989` | Ревью PR, фикс блокеров с регрессионными тестами, пуш, ожидание зелёного CI, вердикт по мержу. Добавьте `security`, чтобы проверить только безопасность. |
-| security-review | `/mega-skills:security-review 2989` | Общее ревью и ревью безопасности PR в отдельном worktree: тесты в Docker, прогон на свежем main, authz/IDOR, XSS, open redirect, сессии, rate limits. Без правок в ветке PR. |
+| security-review | `/mega-skills:security-review 2989` | Ревью PR без правок: общее ревью кода (корректность, производительность, обработка ошибок, качество тестов, совместимость миграций и API) и безопасность (authz/IDOR, XSS, open redirect, сессии, rate limits). Тесты в Docker, прогон на свежем main, градация находок, отчёт в PR. |
+| review-pr | `/mega-skills:review-pr 2989` | Исправить блокеры и довести PR до зелёного CI: фикс с регрессионным тестом, пуш в ветку PR, ожидание CI, вердикт. Запускается только по явной просьбе менять код. |
 | customer-reply | `/mega-skills:customer-reply` | Ответ клиенту обычным текстом без Markdown, с проверенным именем адресата. |
 | preflight | `/mega-skills:preflight` | Проверка и починка окружения перед тестами: Docker/OrbStack, APP_URL в .env, смонтированный worktree, изоляция тестовой БД. |
 | multi-repo-feature | `/mega-skills:multi-repo-feature <описание>` | План фичи на backend, gateway и frontend, согласованные PR, проверка, что всё дошло до main. |
@@ -25,7 +25,7 @@
 
 Хукам нужны `jq` и `php` на машине. Если phpcs в проекте не установлен, php-lint молчит.
 
-Вызывать скиллы вручную не обязательно: Claude сам подключает скилл, когда запрос подходит под его описание. Например, «проверь PR 2989 и дай вердикт» запустит `review-pr`.
+Вызывать скиллы вручную не обязательно: Claude сам подключает скилл, когда запрос подходит под его описание. Например, «проверь PR 2989 и дай вердикт» запустит `security-review` — ревью только на чтение. Правки в ветке PR делает `review-pr`, и только если вы прямо попросили исправить и запушить.
 
 ## Установка
 
@@ -95,8 +95,8 @@ mega-skills/
         ├── .claude-plugin/
         │   └── plugin.json       # описание плагина
         ├── skills/
-        │   ├── review-pr/SKILL.md
         │   ├── security-review/SKILL.md
+        │   ├── review-pr/SKILL.md
         │   ├── customer-reply/SKILL.md
         │   ├── preflight/SKILL.md
         │   └── multi-repo-feature/SKILL.md
