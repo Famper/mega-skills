@@ -1,8 +1,8 @@
 # mega-skills
 
-Скиллы для Claude Code: ревью PR с вердиктом, ревью безопасности, ответы клиентам, проверка локального окружения и фичи в нескольких репозиториях.
+Скиллы для Claude Code и Google Antigravity: ревью PR с вердиктом, ревью безопасности, ответы клиентам, проверка локального окружения и фичи в нескольких репозиториях.
 
-Репозиторий устроен как маркетплейс плагинов Claude Code: в нём один плагин `mega-skills`, внутри которого лежат все скиллы.
+Репозиторий универсален и поддерживает как Claude Code, так и Google Antigravity.
 
 ## Скиллы
 
@@ -16,20 +16,67 @@
 
 ## Хуки
 
-Плагин также ставит два хука, они работают автоматически:
+Репозиторий включает два хука, адаптированных как для Claude Code, так и для Antigravity:
 
 | Хук | Когда | Что делает |
 |---|---|---|
-| docker-check | Начало сессии | Если в проекте есть docker-compose, а Docker/OrbStack не отвечает, предупреждает Claude, и тот сразу говорит вам, а не тратит время на обходные пути. |
-| php-lint | После правки `.php` | Прогоняет phpcs по изменённому файлу (стандарт `App/Standards/Laravel.xml` или `phpcs.xml` проекта) и возвращает ошибки Claude, чтобы он исправил их до пуша. Предупреждения не показывает, только ошибки. |
+| docker-check | Начало сессии (`SessionStart`) | Если в проекте есть docker-compose, а Docker/OrbStack не отвечает, предупреждает агента, и тот сразу сообщает вам. |
+| php-lint | После правки `.php` (`PostToolUse`) | Прогоняет phpcs по изменённому файлу (стандарт `App/Standards/Laravel.xml` или `phpcs.xml` проекта) и возвращает ошибки агенту, чтобы он исправил их до пуша. Предупреждения не показывает, только ошибки. |
 
 Хукам нужны `jq` и `php` на машине. Если phpcs в проекте не установлен, php-lint молчит.
 
-Вызывать скиллы вручную не обязательно: Claude сам подключает скилл, когда запрос подходит под его описание. Например, «проверь PR 2989 и дай вердикт» запустит `security-review` — ревью только на чтение. Правки в ветке PR делает `review-pr`, и только если вы прямо попросили исправить и запушить.
+Вызывать скиллы вручную не обязательно: агент сам подключает скилл, когда запрос подходит под его описание. Например, «проверь PR 2989 и дай вердикт» запустит `security-review` — ревью только на чтение. Правки в ветке PR делает `review-pr`, и только если вы прямо попросили исправить и запушить.
 
-## Установка
+---
 
-Нужен Claude Code и доступ к репозиторию `Famper/mega-skills` на GitHub.
+## Установка в Google Antigravity
+
+### Способ 1. Симлинками в глобальные скиллы (рекомендуется)
+
+Скиллы будут доступны во всех ваших проектах, а изменения после `git pull` подхватятся сразу без перезагрузок:
+
+```bash
+mkdir -p ~/.gemini/config/skills
+for d in ~/PhpstormProjects/mega-skills/plugins/mega-skills/skills/*/; do
+  ln -sfn "$d" ~/.gemini/config/skills/"$(basename "$d")"
+done
+```
+
+### Способ 2. Через глобальный `skills.json`
+
+Добавьте путь к папке скиллов в `~/.gemini/config/skills.json`:
+
+```json
+{
+  "entries": [
+    {
+      "path": "~/PhpstormProjects/mega-skills/plugins/mega-skills/skills"
+    }
+  ]
+}
+```
+
+### Способ 3. Как плагин Antigravity (включая хуки)
+
+Залинкуйте плагин в каталог плагинов Antigravity:
+
+```bash
+mkdir -p ~/.gemini/config/plugins
+ln -sfn ~/PhpstormProjects/mega-skills/plugins/mega-skills ~/.gemini/config/plugins/mega-skills
+```
+
+### Способ 4. Только для одного проекта
+
+Скопируйте нужные папки в `.agents/skills/` репозитория проекта:
+
+```bash
+mkdir -p <путь_к_проекту>/.agents/skills
+cp -R ~/PhpstormProjects/mega-skills/plugins/mega-skills/skills/* <путь_к_проекту>/.agents/skills/
+```
+
+---
+
+## Установка в Claude Code
 
 ### Способ 1. Как плагин (рекомендуется)
 
@@ -64,8 +111,6 @@ claude plugin uninstall mega-skills@mega-skills
 
 ### Способ 2. Ссылками в личные скиллы (для разработки)
 
-Подходит, если вы правите скиллы и хотите видеть изменения сразу, без обновления плагина. Скиллы будут вызываться без префикса: `/review-pr`, `/preflight`.
-
 ```bash
 git clone git@github.com:Famper/mega-skills.git ~/PhpstormProjects/mega-skills
 mkdir -p ~/.claude/skills
@@ -74,26 +119,31 @@ for d in ~/PhpstormProjects/mega-skills/plugins/mega-skills/skills/*/; do
 done
 ```
 
-Не используйте оба способа одновременно, иначе каждый скилл появится дважды.
-
 ### Только для одного проекта
 
-Чтобы скиллы работали только в конкретном репозитории, скопируйте нужные папки в `.claude/skills/` этого проекта и закоммитьте их.
+Скопируйте нужные папки в `.claude/skills/` этого проекта и закоммитьте их.
 
-## Проверка
+---
 
-В новой сессии Claude Code спросите «какие скиллы тебе доступны?» или введите `/` и найдите `review-pr` в списке.
+## Теги в GitHub
+
+- **`v1.4.0-claude`** — релиз для Claude Code.
+- **`v1.4.0-antigravity`** — релиз с универсальной поддержкой Google Antigravity и Claude Code.
+
+---
 
 ## Структура
 
 ```
 mega-skills/
 ├── .claude-plugin/
-│   └── marketplace.json          # описание маркетплейса
+│   └── marketplace.json          # описание маркетплейса Claude Code
 └── plugins/
     └── mega-skills/
         ├── .claude-plugin/
-        │   └── plugin.json       # описание плагина
+        │   └── plugin.json       # манифест плагина для Claude Code
+        ├── plugin.json           # манифест плагина для Google Antigravity
+        ├── hooks.json            # хуки для Google Antigravity
         ├── skills/
         │   ├── security-review/SKILL.md
         │   ├── review-pr/SKILL.md
@@ -101,9 +151,9 @@ mega-skills/
         │   ├── preflight/SKILL.md
         │   └── multi-repo-feature/SKILL.md
         └── hooks/
-            ├── hooks.json        # подключение хуков
-            ├── docker-check.sh
-            └── php-lint.sh
+            ├── hooks.json        # хуки для Claude Code
+            ├── docker-check.sh   # универсальный скрипт проверки Docker
+            └── php-lint.sh       # универсальный скрипт линтинга PHP
 ```
 
 ## Как добавить свой скилл
@@ -113,19 +163,19 @@ mega-skills/
    ```markdown
    ---
    name: <имя>
-   description: Что делает скилл и когда его использовать. Claude выбирает скилл по этому тексту.
+   description: Что делает скилл и когда его использовать. Агент выбирает скилл по этому тексту.
    ---
 
-   Инструкции для Claude.
+   Инструкции для агента.
    ```
 
 2. Рядом можно положить скрипты, шаблоны и примеры, на которые ссылается `SKILL.md`.
-3. Проверьте, что всё собирается и скилл виден:
+3. Для Claude Code проверьте, что плагин валиден:
 
    ```bash
    claude plugin validate .
    claude --plugin-dir ./plugins/mega-skills plugin details mega-skills
    ```
 
-4. Поднимите `version` в `plugins/mega-skills/.claude-plugin/plugin.json`.
-5. Закоммитьте и запушьте. Тем, кто установил плагин, нужно выполнить команды из раздела «Обновление».
+4. Поднимите `version` в `plugins/mega-skills/.claude-plugin/plugin.json` и `plugins/mega-skills/plugin.json`.
+5. Закоммитьте и запушьте изменения.

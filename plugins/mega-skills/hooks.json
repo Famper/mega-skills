@@ -1,0 +1,23 @@
+{
+  "mega-skills": {
+    "SessionStart": [
+      {
+        "type": "command",
+        "command": "./hooks/docker-check.sh",
+        "timeout": 10
+      }
+    ],
+    "PostToolUse": [
+      {
+        "matcher": "edit_file|write_file",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "./hooks/php-lint.sh",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}
